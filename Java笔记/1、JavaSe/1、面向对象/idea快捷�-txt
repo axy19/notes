@@ -1,0 +1,19 @@
+idea快捷键：
+	代码提示：Ctrl+空格
+	快速删除一行：Ctrl+x ctrl+y
+	快速复制一行：Ctrl+d
+	单行注释：Ctrl+/
+	块注释：Ctrl+Shift+/
+	批量修改变量名:点击变量名后按shift+F6,直接输入新的变量名
+	格式化代码格式：Ctrl+Alt+l
+	撤销修改：Ctrl+z
+	常用代码简写提示：Ctrl+j
+	输出语句：sout
+	for循环：fori
+Debug:调试
+	左侧栏单机添加断点
+	Ctrl+Shift+F9进入Debug
+	Ctrl+shift+F10运行程序
+	F8下一步
+	F7进入
+	Alt+F9:直接运行至光标处

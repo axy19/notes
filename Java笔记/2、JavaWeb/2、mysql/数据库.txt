@@ -1,0 +1,448 @@
+/*以下代码大约150行左右，需要全部掌握*/
+/*1.学习思路：根据提出的数据库操作需求，完成相应的数据库操作即可*/
+/*2.知识点掌握：课前资料---mysql完整笔记*/
+/******************************************1.操作数据库*****************************************/
+
+/*================1.1 创建数据库================*/
+create database javaweb;/*默认字符集是utf8，默认校验规则是大小写不敏感*/
+create  database javaweb01 character set gbk;/*设置中文字符集*/
+create database  javaweb02 character set utf8 collate utf8_bin;/*大小写敏感*/
+create database javaweb03  character set utf8 collate  utf8_general_ci;/*大小写不敏感*/
+/*if not exists不存在时创建，存在时不创建同时不报错误，只给一个提示*/
+create database if not exists javaweb;
+#获取所有数据的配置文件路径--查看文件路径
+/*like是模糊查询，匹配字符
+  %%是要匹配的内容，任意一段匹配就可以*/
+show variables like '%dir%';
+show variables like '%con%';
+/*================1.2 查看数据库================*/
+
+select database();
+show databases ;
+
+/*================1.3 查看数据的创建语句（查看数据库的字符集）*/
+show create  database javaweb03;
+
+/*================1.4 删除数据库================*/
+/*一般来说程序员拿不到root权限删除数据库的！！！*/
+/*红色代表没有该数据库*/
+/*drop database test01;
+drop database test02;
+drop database test03;*/
+
+/*================1.5 修改数据库================*/
+#修改数据库的字符集为gbk
+alter database  javaweb01 default character set utf8;
+/*================1.6 选择数据库================
+		在数据库服务器中不同数据库，可以存在相同名称的表，
+		为了表示清楚操作的是哪一个库中的哪一张表，需要先选择数据库，在操作表。*/
+use javaweb01;
+
+
+/*================1.7 查看当前选择的是哪一个数据库================*/
+select database();
+
+
+/******************************************2.表操作*****************************************
+/*================2.1 创建表:表示存在于某一个database中================*/
+/*特别注意：必须先选中database然后进行表的操作*/
+create table user (
+    id int(10),/*逗号代表的英文分隔符*/
+    name varchar(20),/*代表字符串，，长度20*/
+    password varchar(20),
+    birthday date
+);
+/*================创建employee：这是一个员工表================*/
+create table employee(
+  id int(20),
+  name varchar(5),/*可变长的字符串,比如axy字符串根据长度分配使用空间*/
+  gender char(1),/*固定长度字符串，无论多长都是一样的，一般使用在有特定规律的字符串中*/
+  birthday date,
+  entry_date date,
+  job varchar(10),
+  salary double,
+  resume text/*文本类型，可以存放篇幅较长的纯文本*/
+);
+/*================2.2	字段类型：相详细信息参照图片================
+		§ VARCHAR(20)
+			varchar是以变长的形式来存储数据。存储时只占据数据的字符数量。
+			由于存储的数据是变长， 所以再取出数据之前，先判断数据长度，再读取，效率较低。
+		§ CHAR(20)
+			char是以定长的形式来存储数据。存储的数据都占用指定的存储空间。
+			由于存储的数据是定长，所有可以直接读取固定长度的数据，效率较高。
+		字符串型中存储的数据是字符。*/
+
+/*================2.3 查看当前数据库中的表================*/
+/*1.查看database中的所有得表*/
+show tables ;
+/*2.查看某一个表的表结构*/
+desc employee;
+/*================2.4 数据库中的约束================
+		数据库中创建表中字段时可以使用约束来修饰。
+		这个约束是要求当前字段的一种规范，一旦添加约束，
+		便只能添加符合约束的数据。约束还可以叫做"键"。
+================2.4.1 约束的种类================
+			primary key 表示主键。
+			一个字段修饰为主键之后，
+			要保证当前字段不能为空，不能重复。
+================2.4.2 设置主键的意义：================
+				可以使查询效率更高。
+			auto_increment 自动增长。
+			一个int类型的字段可以被auto_increment约束来修饰。
+			如果一个字段是自增约束的，则这个字段一定是主键字段。
+			但是主键字段不一定会自增。
+*/
+/*================创建包含主键的employee表：================*/
+drop table employee;
+create table employee(
+    id int primary key auto_increment,/*主键可以设置自增，但不一定自增*/
+    name varchar(5) unique not null,/*not null 不能为空 unique不能重复*/
+    gender char(1) not null,
+    birthday date ,
+    entry_date date,
+    job varchar(10),
+    salary double not null ,
+    resume text
+);
+
+
+/*================2.5 查看表结构================*/
+desc employee;
+/*例如：观察任意一个数据库得表，不只是当前数据库*/
+desc javaweb01.user;
+
+/*================2.6 查看表的创建语句：================*/
+show create table javaweb01.employee;
+/*例如：*/
+show create table javaweb01.user;
+
+/*================2.7 修改表================*/
+/*添加：
+alter table table_name add column_name column_type;
+修改：
+alter table table_name modify column_name column_type;
+删除：
+alter table table_name drop column_name ;
+修改表名：
+rename table old_table_name to new_table_name;
+修改字段名称：
+alter table table_name change column_name new_column_name column_type;*/
+/*================a. 练习================
+在上面员工表的基本上增加一个image列。blob*/
+alter table javaweb01.employee add image blob;
+
+/*修改job列，使其长度为60。*/
+alter table javaweb01.employee modify job varchar(60);
+
+/*删除gender列。*/
+alter table javaweb01.employee drop gender;
+/*表名改为employee1。*/
+rename table javaweb01.employee to employee1;
+rename table javaweb01.employee1 to employee;
+/*修改表的字符集为utf8，不常用，因为字符集默认就是utf8*/
+alter table javaweb01.employee character set utf8;
+/*列名name修改为username*/
+alter table javaweb01.employee change name username varchar(30);
+/*================2.8 删除表================
+drop table table_name;*/
+/*例如：*/
+drop table user;
+/******************************************3.表数据操作******************************************/
+/*CRUD:增加create */
+/*	================3.1 插入数据================
+		基本语句格式：
+insert into table_name values(column_value,column_value.....);*/
+/*? ================Insert语句练习================
+				练习：使用insert语句向employee表中插入三个员工的信息。*/
+/*方式一：没有指明table中的具体列，就是表示所有的列都要顺序插入*/
+insert into javaweb01.employee values
+ (default,'axy','1998-11-19','2019-01-01','java程序员',90000,'简介',null);
+/*自增主键需要了解：当数据尝试插入数据失败时，这条记录也会使用一个自增索引，因为失败了，数据没有显示出来。*/
+insert into javaweb01.employee values
+(default,'axy1','1998-11-19','2019-01-01','java程序员',90000,'简介',null);
+insert into javaweb01.employee values
+(default,'axy2','1998-11-19','2019-01-01','java程序员',90000,'简介',null);
+/*方式二：指定table中的其中一些列*/
+insert into javaweb01.employee(id,username,salary) values(null,'aa',9220);
+/*方式三：使用双引号时和单引号的效果一样，但是idea会报错*/
+insert into javaweb01.employee(id,username,salary) values(null,"aaa",9220);
+/*方式四：字段类型与插入的数据类型必须匹配，字符串是数值类型，或者数值是字符串类型时，mysql会自动匹配*/
+insert into javaweb01.employee(id,username,salary) values(null,'aa',9220);
+/*方式五：是字段太长时会报错*/
+/*insert into javaweb01.employee(username,salary) values('1.在不写添加哪一个字段的值的情况下，书写的值要和表格中的每一个字段顺序一致。
+			2.在书写某一个或几个字段名称的情况下，则只需添加指定字段的值，并按照指定的顺序添加即可。
+			3.插入字符类型和日期类型的数据时，要书写在单引号或者双引号中间。(注意：要为英文的符号。)
+			4.插入数据的类型要和字段类型匹配。
+			5.插入数据的长度不能超过字段长度限制。',9220);*/
+/*================插入数据时的注意事项：================
+			1.在不写添加哪一个字段的值的情况下，书写的值要和表格中的每一个字段顺序一致。
+			2.在书写某一个或几个字段名称的情况下，则只需添加指定字段的值，并按照指定的顺序添加即可。
+			3.插入字符类型和日期类型的数据时，要书写在单引号或者双引号中间。(注意：要为英文的符号。)
+			4.插入数据的类型要和字段类型匹配。
+			5.插入数据的长度不能超过字段长度限制。
+			6.如果字段为自增，则可以预留一个null值，这个字段的值会由数据库自动维护。*/
+/*================3.1.1插入中文================*/
+show variables like '%chara%';
+insert into javaweb01.employee(id,username,salary) values(null,'中文',9220);
+
+/******************************************3.1.2修改数据字符集*****************************************
+			cmd使用gbk，mysql数据库使用utf8，两者都有中文，但是修改cmd窗口过于繁琐，所以修改数据库的字符集。
+		修改方式：
+			1. 使用set names gbk;语句修改。
+				这种修改方式只是临时生效，只在当前窗口可以修改使用。
+			2.修改mysql根目录中的my.ini文件。
+				修改配置文件的57行：
+				default-character-set=utf8
+				改为?
+				default-character-set=gbk
+				重启mysql服务器。
+				这种方式为永久修改，重启服务之后，会一直采用gbk字符集，永久有效。*/
+/******************************************3.2.更新语句******************************************/
+/*================基本语句：更新的是某一行中的列对应的值================
+update table_name set column_name = value;*/
+/*================update表示更新================
+set表示设置一个字段的值
+where表示有条件的关键字，可以在这个关键字之后添加条件内容。sql语句只会影响满足条件的行。
+*/
+/*================Update语句练习================
+? 练习：在上面创建的employee表中修改表中的纪录。
+  要求:*/
+/*将所有员工薪水修改为5000元。*/
+update javaweb01.employee set javaweb01.employee.salary=5000;
+/*将姓名为'axy'的员工薪水修改为8000元。*/
+update javaweb01.employee set employee.salary=8000 where username='axy';
+/*将姓名为'aa'的员工薪水修改为6000元,job改为ccc。*/
+update javaweb01.employee set javaweb01.employee.salary=6000,job='ccc' where javaweb01.employee.username='aa';
+/*将'axy'的薪水在原有基础上增加1000元。*/
+update javaweb01.employee set javaweb01.employee.salary=salary+1000 where username='axy';
+/******************************************3.3 删除语句******************************************/
+/*================基本格式：================
+delete from table_name;
+delete from 表示删除
+
+truncate关键字 表示删除。*/
+/*truncate与delete删除方式的区别：
+delete from删除表中的数据。
+  truncate删除整张表然后再重建。
+  truncate的删除效率较高，但是可能会摧毁表与表之间的关系。所以在单表中可以使用，多表关系中不要使用。
+delete from 是逐条删除表中记录所以，效率较低，但是不会摧毁表，能维护表结构和表关系。适用于单表或多表的删除。
+*/
+/* ================a. Delete语句练习================
+ 删除表中id为2的记录。*/
+delete from employee where id=4;
+/*删除表中所有记录。*/
+delete from employee;
+/*使用truncate删除表中记录。*/
+truncate javaweb01.employee;
+/******************************************3.4 查询语句******************************************/
+/*================3.4.1基本语句：================
+select * from table_name;
+select 表示查询
+   * 表示表格中所有的字段。
+from 表示从哪一张表中查询。
+select id,name from table_name;
+--这种方式只显示id和name字段的值。*/
+/*面试题：
+  一个sql的查询效率和索引有很大关系。
+  如果一个表中有索引，将会大大提升查询效率。
+使用*号和书写全部字段都会使用id这个索引字段，
+  只要使用索引，他们的查询效率都会很高。
+如果要区分两者是效率，则书写全部字段比书写*号要更快一些。
+原因是：*需要判断当前表中使用了哪些字段，
+而直接书写字段名称，数据库只需要根据指定的字段名称查询即可，
+  无需判断使用了哪些字段。
+distinct :去重操作：
+select distinct column_name from table_name;*/
+
+/*================练习：参见课堂案例================
+
+查询表中所有学生的信息。*/
+create table exam(
+                     id int primary key auto_increment,
+                     name varchar(20) not null,
+                     chinese double,
+                     math double,
+                     english double
+);
+
+insert into exam values(null,'关羽',85,76,70);
+insert into exam values(null,'张飞',70,75,70);
+insert into exam values(null,'张飞',80,75,70);
+insert into exam values(null,'赵云',90,65,95);
+insert into exam values(null,'赵云',90,65,95);
+select * from exam;
+/*查询表中所有学生的姓名和对应的英语成绩。*/
+select name,english from exam;
+/*过滤表中重复数据。distinct去重*/
+select distinct name,chinese,math,english from exam;
+select distinct * from exam;
+/*================3.4.2查询语句添加表达式================*/
+
+/*使用别名：*/
+
+/*练习
+在所有学生分数上加10分特长分显示。*/
+/*as别名关键字，可以写可以不写，可以写中文*/
+select exam.chinese+10 as ch,math+10 as mt,exam.english+10 as 英语 from exam;
+/*统计每个学生的总分。*/
+select name,exam.chinese+math +exam.english as 总分 from exam;
+/*使用别名表示学生总分。*/
+select name,exam.chinese+math +exam.english as 总分 from exam;
+/******************************************3.4.3 有条件的查询*****************************************
+			在查询语句之后添加where子句。
+			使用where子句，进行过滤查询。练习：
+查询姓名为'关羽'的学生成绩*/
+
+/*查询英语成绩大于90分的同学*/
+select * from exam where english>90;
+/*查询总分大于200分的所有同学*/
+select name,chinese+math+english as sum from exam where chinese+math+english>200;
+/*select name, math + chinese + english as sum
+from exam
+where sum > 200;
+--报错，错误信息：位置字段sum，无法在where条件中使用。*/
+/*无法使用的原因：
+  sql语句存在关键字执行顺序的问题。
+  from   >   where   >    select  > order by
+
+由于where关键字优先于select关键字执行，所以无法在where子句中使用select子句中的别名。*/
+
+/*================练习：================
+查询英语分数在 80－100之间的同学。*/
+/*between..and...区间[70,95]*/
+select * from exam where english between 70 and 95;
+/*查询数学分数为75,86,87的同学。枚举*/
+select * from exam where math in(75,86,87);
+/*查询所有姓张的学生成绩。模糊查询*/
+select * from exam where name like '张%';
+/*查询数学分>70，语文分>80的同学。*/
+select * from exam where math>70 and chinese>80 ;
+/*查询数学分>70，或者语文分>80的同学。*/
+select * from exam where math>70 or chinese>80;
+/*查询数学不及格(60分)的同学。*/
+select * from exam where math<60;
+select * from exam where not math>=60;
+
+/*查询未参加数学考试（null）的同学。*/
+insert into exam values (null, '曹洋', 80, null, 60);
+select * from exam where math is null ;
+select name,ifnull(math,0) as math from exam where math is null ;
+/******************************************3.4.4 order by子句*****************************************
+			order by 可以实现对查询结果排序的操作。
+			基本语句：
+select * from table_name order by column_name;
+order by 表示排序。
+			排序方式有两种：
+				asc 升序(默认)  desc 降序。
+			order by关键字的特点：
+				order by永远书写在整个sql语句的最后。
+				order by是所有关键字中最后一个执行的关键字。
+			拓展：
+				order by会严重影响查询效率，使查询速度变得很慢。*/
+/*练习：对语文成绩排序后输出。*/
+select * from exam order by chinese;/*默认是升序*/
+select * from exam order by chinese asc ;/*升序*/
+/*对总分排序按从高到低的顺序输出*/
+select *,math+chinese+english as sum from exam order by sum desc;/*降序*/
+/*对姓关的学生成绩排序输出*/
+insert into exam
+values (null, "关平", 80, 80, 80);
+select * from exam where name like '关%' order by math;
+/******************************************3.5  聚集函数*****************************************
+		在mysql中内置了很多的函数，这些函数可以直接获取使用。不同的函数可以实现的功能不同：例如：
+		字符串函数
+		时间函数
+		聚集函数等...
+================3.5.1 聚集函数---count 计数================
+			获取满足条件的行数。
+			基本语句：
+select count(*)|count(column_name) from table_name;*/
+/*练习：
+统计一个班级共有多少学生？*/
+select count(*) from exam;
+select count(exam.id) from exam;
+select count(1) from exam;/*1可以是任何一个数字*/
+
+/*~拓展：*/
+/*读取列表中的第一个字段的行数。*/
+/*~面试题：
+  count(*)和count(1)谁的效率更高？
+  count(*) 和count(1)两者的执行效率相似。如果表中的字段数量较少，则两者的查询效率几乎一致。
+如果表中字段数量较多，则count(1)从查询效率稍快。count(*)在计数之前需要统计有多少个字段，
+这个统计的时间十分短暂，可以忽略不计。所以在字段数量较少的时候，两者的查询效率是一致的。
+数据库中存在范式这个概念。范式是用来规定当前数据库建表时的规范。
+这个规范规定了如何创建一个表。例如：字段中的数据含义必须独立。字段之间关联性将至最低等。
+按照这些规范来创建的表，字段数量一定不会很多，所以字段数量较多这种情况，一般不会存在。所以就不会考虑count(*)统计多个字段的时间。
+最终可以认为count(*)和count(1)两者的执行效率是一致的。*/
+/*统计数学成绩大于90的学生有多少个？*/
+select count(*) from exam where math>=80;
+/*统计总分大于250的人数有多少？*/
+select count(*) from exam where math+chinese+english>200;
+/******************************************3.5.2 聚集函数---sum 求和*****************************************
+			获取某一个字段所有满足条件行的和。
+			sum(chinese) where id<4
+			基本语句：
+select sum(column_name) from table_name;*/
+/*练习：统计一个班级数学总成绩？*/
+select sum(math) from exam;
+/*统计一个班级语文、英语、数学各科的总成绩*/
+select sum(exam.chinese),sum(exam.english),sum(exam.math) from exam;
+/*统计一个班级语文、英语、数学的成绩总和*/
+/*特别注意：如果分数存在null时最好添加ifnull()*/
+select sum(chinese+ifnull(math,0)+english) from exam;
+select sum(exam.chinese)+sum(ifnull(exam.math,0))+sum(exam.english) from exam;
+/*统计一个班级语文成绩平均分*/
+select sum(ifnull(exam.chinese,0))/count(1)  from exam;
+/*注意：sum仅对数值起作用，否则会报错。
+			注意：对多列求和，“，”号不能少。*/
+/*	3.5.2 聚集函数---avg 求平均
+    获取指定字段中满足条件行的平均值。
+    基本语句：
+select avg(column_name) from table_name;*/
+/*练习：求一个班级数学平均分？*/
+select avg(ifnull(math,0)) from exam;
+/*求一个班级总分平均分？*/
+/*先求和再求平均数，不需要里边求和*/
+select avg(chinese+ifnull(math,0)+english) from exam;
+
+/******************************************3.5.2 聚集函数－MAX/MIN*****************************************
+			Max/min函数返回满足where条件的一列的最大/最小值
+select max(column_name),min(column_name) from table_name;*/
+/*练习：求班级最高分和最低分（数值范围在统计中特别有用）*/
+select max(exam.chinese),min(chinese) from exam;
+/*求班级最高语文成绩的学生姓名和成绩值。*/
+/*第一个查询查出最高分
+  第二个查询根据最高分查询成绩单，找到那个学生*/
+select * from exam where chinese=(select  max(chinese) from exam );
+/*拓展：子查询：在一个查询语句中，包含另外一个查询语句，这种查询方式称之为子查询。*/
+/******************************************3.6 Select语句(6)分组操作*****************************************
+			基本语句：
+select column_name from table_name group by column_name;
+分组子句和聚集函数经常在一起使用。如果在一起使用则表示，在分组之后，再进行每一组的聚集函数执行操作。
+*/
+create table orders(
+                       id int,
+                       product varchar(20),
+                       price float
+);
+
+insert into orders(id,product,price) values(1,'电视',900);
+insert into orders(id,product,price) values(2,'洗衣机',100);
+insert into orders(id,product,price) values(3,'洗衣粉',90);
+insert into orders(id,product,price) values(4,'桔子',9);
+insert into orders(id,product,price) values(5,'洗衣粉',90);
+/*练习：对订单表中商品归类后，显示每一类商品的总价.*/
+select sum(price) from orders group by product;
+/*? 使用having 子句 对分组结果进行过滤
+练习：查询购买了几类商品，并且每类总价大于100的商品*/
+select product from orders group by product having sum(price)>100;
+/*? where和having区别：where在分组前进行条件过滤，having在分组后进行条件过滤。
+使用where的地方都可以用having替换。但是having可以使用分组函数，而where后不可以使用。
+*/
+
+/*	外键*/
+/*insert into emp
+values (null, '兰姐姐', 5);/*----错误*/
+/*delete
+from dept
+where id = 1;*/ /*---   错误。*/

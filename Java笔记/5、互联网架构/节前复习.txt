@@ -1,0 +1,401 @@
+AJAX
+	异步请求 局部刷新
+
+	1.源生Ajava	
+		(1)创建XMLHTTPRequest对象
+			function ajaxFunction(){
+				var xmlHttp;
+				try{
+					//现代浏览器（IE7+、Firefox、Chrome、Safari 和 Opera）都有内建的 XMLHttpRequest 对象
+					xmlHttp = new XMLHttpRequest();
+				}catch(e){
+					try{
+						//IE6.0
+						xmlHttp = new ActiveXObject("Msxml2.XMLHTTP");
+					}catch(e){
+						try{
+							//IE5.0及更早版本
+							xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+						}catch(e){
+							alert("创建XHR对象失败！");
+							throw e;
+						}
+					}
+				}
+				return xmlHttp;
+			}
+		(2)打开到服务器的连接
+			xmlHttp.open(method, url, async);
+			method:请求方式 GET、POST
+			url:访问地址
+			async:异步模式开关
+		(3)发送请求
+			xmlHttp.setRequestHeader("Content-Type","application/x-www-form-urlencoded");   
+			xmlHttp.send("xxxx"); 
+			GET请求send后传入null
+			POST请求, 传入的就是请求参数"username=张飞&psw=123"
+		(4)监听回调
+			在发送请求后，随着异步请求的进行，xmlHTTP对象中的onreadystate属性会经历如下五个值的变化
+				0状态: 表示刚创建XMLHttpRequest对象, 还未调用open()方法
+				1状态: 表示刚调用open()方法, 但是还没有调用send()方法发送请求 
+				2状态: 调用完了send()方法了, 请求已经开始
+				3状态: 服务器已经开始响应, 但是不代表响应结束 
+				4状态: 服务器响应结束!(通常我们只关心这个状态) 
+			每次变化的时候都会触发onreadystatechange事件，可以在事件事件触发的函数中进行处理
+			可以用如下api来操作响应数据：
+				xmlHttp.status 服务器返回的状态码
+				xmlHttp.responseText 服务器返回的数据，以文本格式获取
+				xmlHttp.responseXML 服务器返回的数据，以xml或html格式来获取
+
+			xmlHttp.onreadystatechange = function(){
+				//当服务器已经处理完请求之后
+				if(xmlHttp.readyState == 4){
+					if( xmlHttp.status == 200 ){
+						//获取响应数据
+						var result = xmlHttp.responseText;
+						result = xmlHttp.responseXML;
+					}
+				}
+			}
+
+sql
+	sql语句的编写顺序
+		select from where group by having order by limit 
+	sql语句的执行顺序	
+		from where group by having select order by limit
+
+		select addr,count(*) as cn from user where age>18 group by addr order by cn desc;
+		
+	条件查询
+		where
+	分组查询
+		group by
+		聚合函数的使用
+			如果没有group by聚合函数作用在整个结果上
+			如果有gourp by聚合函数作用在组内
+			聚合函数不可嵌套
+		where 和 having的区别
+			都可以实现过滤
+			where是在分组之前做过滤
+			having是在分组之后做过滤
+			where内部不可使用聚合函数
+			having内部可以使用聚合函数
+			如果没有分组操作，可以通过having替代where
+			
+	排序查询
+		order by
+			同时使用分组和排序 先分组后排序
+			数字 排序 按数字的自然顺序排列大小
+			字符串 排序 按照字典顺序进行排序
+			desc asc
+	分页查询
+		limit
+	子查询
+		普通子查询(非关联子查询)：子查询和主查询没啥关系，子查询只是将自己的查询结果提供给主查询使用
+			将sql语句查询结果作为一个表来使用
+				select addr,min(aage) from (select addr,avg(age) as aage from user group by addr) as atab;
+			将sql语句的查询结果作为一个数组来使用在select where in语句中
+				select name from user where addr in (select addr from user group by addr having avg(age)>20);
+		关联子查询
+			
+				
+	多表查询
+		利用表之间的关系进行连接查询
+
+		多表设计
+			一对一
+				班级 教室   在任意一边设计外键保存另一边的主键作为外键
+			一对多
+				班级 学生   在多的一方设计外键保存一的一方的主键作为外键
+			多对多
+				老师 学生   设计一张中间表保存两张表的对应关系
+		多表查询
+			笛卡尔积查询
+				select * from dept,emp;
+			内连接查询
+				select * from dept,emp where dept.id = emp.deptid;
+				select * from dept inner join emp on dept.id = emp.deptid;
+			外连接查询
+				左外
+					select * from dept left join emp on dept.id = emp.deptid;
+				右外
+					select * from dept right join emp on dept.id = emp.deptid;
+				全外
+					select * from dept full join emp on dept.id = emp.deptid;
+
+					select * from dept left join emp on dept.id = emp.deptid
+					union
+					select * from dept right join emp on dept.id = emp.deptid;
+
+		JDBC
+			六个步骤实现jdbc
+			预编译的Statement对象
+			数据源
+			批处理
+
+		事务
+			逻辑上的一组操作 要么同时完成要么同时失败
+			案例：
+				转账100元
+
+			事务操作
+				命令行操作
+					start tansaction;
+					commit;
+					rollback;
+				jdbc操作
+					conn.setAutoCommit(false)
+					conn.commit()
+					conn.rollback()
+
+			事务的四大特性
+				原子性
+				一致性
+				隔离性
+				持久性		
+				
+			隔离性
+				多线程并发安全问题 --> 加锁 --> 性能降低
+
+				并发的读 - 不隔离
+				并发的写 - 要隔离
+				一个读一个写 - 看情况，根据业务需求定
+
+				脏读 一个事务读取到另一个事务未提交的数据
+				不可重复读	一个事务读取到另一个事务已提交的数据(单元格)
+				虚读(幻读) 一个事务读取到另一个事务已经提交的数据(表级别)
+
+
+				Read Uncommitted
+				Read Committed;
+				Serializable Read;
+				Serializable;
+
+			数据库中的锁
+				共享锁
+					非Seralizable隔离级别查询不加锁
+					Serializable隔离级别查询加共享锁
+					共享锁和共享锁可以共存 共享锁和排它锁无法共存
+					
+				排他锁
+					任意级别增删改都加排他锁
+					排他锁和任何所都不能共存
+					任意隔离级别下 增删改都加排他锁
+
+			约束
+				主键约束
+					primary key
+					复合主键
+						create table t1(id int,name char(10),primary key(id name));
+				非空约束
+					not null
+				唯一约束
+					unquie
+				check约束
+					check(..)
+				外键约束
+				默认约束
+					defalt "xxx"
+				
+		**索引
+		**视图
+		**存储过程
+
+HTTP协议
+	应用层协议
+
+	基于请求响应模型
+	一次请求对应一次响应
+	请求只能由客户端发出 服务器只能被动等待请求作出响应
+	
+	
+	请求
+		请求行
+			GET /1.jpg HTTP/1.1
+			GET POST HEAD OPTIONS PUT DELETE TRACE CONNECT 
+			
+		请求头
+			Host:localhost
+			Refrer：xxxxx
+			accept-encoding: gzip, deflate, br 
+			accept-language: zh-CN,zh;q=0.9
+			content-type: text
+			cookie: _ga=GA1.2
+			referer: https://www.cnblogs.com/
+			user-agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36
+			
+		空行
+			
+		实体内容
+			xxxxxxxxxxxxx
+	
+	响应
+		一个状态行
+			HTTP/1.1 200 OK
+			协议版本
+			状态码
+				1xx 通知
+				2xx 成功
+					200
+				3xx 重定向
+					302 304 307
+				4xx 客户端错误
+					404
+				5xx 服务端错误
+					500
+			描述信息
+		若干响应头
+			content-encoding: gzip
+			content-type: text/html; charset=utf-8
+			set-Cookie:xxx
+			keep-alive:connect
+		空行
+		实体内容
+			xxxx
+
+	URL编码
+		中
+			00001111
+			11111010	==>		%3C%2D%F7
+			00100100
+		
+
+web
+	servlet
+		生命周期
+			第一次使用创建，创建后调用init方法执行初始化，之后一直驻留在内存中提供服务。
+			如果有请求要访问Servlet，会创建代表请求的request对象和代表响应的response对象，之后调用service方法执行逻辑。
+			执行结束后将response对象中的数据取出形成响应发送给客户端。
+			到服务器关闭或web应用移除出容器时servlet销毁，销毁之前执行destory方法进行善后工作。
+
+
+	request/response
+		生命周期
+		乱码解决
+
+	servletConfig
+		获取全局初始化参数
+		获取ServletContext对象
+	ServletContext
+		生命周期
+
+	cookie
+		cookie set-Cookie
+		setPath
+		setMaxAge
+		setDomain
+	session
+		JSESSIONID
+
+		request.getSession()
+		超时
+		session.invalidate();
+		服务器非正常关闭
+
+
+	jsp
+		原理
+			本质上是一个servlet
+		jsp基础
+			<% %>
+			<%= %>
+			<%-- --%>
+			<%! %>
+			<%@ %>
+		el表达式
+			${}
+		jstl标签库
+			<c:xxx>
+	
+	设计模式
+		Model1
+		Model2
+		经典三层架构 - MVC软件分层思想
+		web service dao
+		高内聚 低耦合
+
+		
+	Filter
+		过滤器
+		Filter
+			doFilter(chain)
+				xxx
+				chain.dofilter();
+				xxx
+		乱码解决过滤器
+		敏感词过滤
+		记录日志
+
+	Listner
+		监听应用状态变化，执行不同代码
+		8个
+
+		ServletContextListener
+		ServletRequestListener
+		HttpSessionListern
+
+		ServletContextAttributeListener
+		ServletRequestAttributeListener
+		HttpSessionAttributeListern
+
+		HttpSessionBindingListener
+		HttpSessionActivationListener
+		
+四大作用域
+	ServletContext
+		生命周期
+			应用启动创建 应用销毁销毁
+		作用范围
+			整个web应用
+		主要功能
+			在整个web应用范围内共享数据
+		
+	session
+		生命周期
+			第一次调用request.getSession创建
+			超时 自杀 意外身亡
+		作用范围
+			一次会话内
+		主要功能
+			在一个会话范围内共享数据
+
+	request
+		生命周期
+			请求开始创建 请求结束下回
+		作用范围
+			一次请求过程中
+		主要功能
+			在请求链范围内共享数据
+	page
+		生命周期
+			jsp页面访问开始创建 访问结束销毁
+		作用范围
+			一个jsp页面内
+		主要功能
+			在一个jsp页面中共享数据
+
+三种资源跳转方式
+	转发
+		服务器内部
+		一次请求一次响应
+		地址栏不发生变化
+		可以通过request域传递数据
+	重定向
+		302+Location
+		服务器和浏览器之间交互
+		两次请求两次响应
+		不能通过request与传递数据
+	定时刷新
+		refresh
+		服务器和浏览器之间交互
+		两次请求两次响应
+		不能通过request与传递数据
+		有时间间隔，在跳转期间可以向客户端展示提示信息	
+		
+		
+		
+		
+
+
+	
+	
